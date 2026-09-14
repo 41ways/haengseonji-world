@@ -36,6 +36,14 @@ npx wrangler deploy            # 코드 반영 (GitHub 푸시만으로는 안 �
 
 로컬: `.dev.vars`에 `ANSWER_SALT=아무값`, `npx wrangler d1 execute haengseonji-world --local --file schema.sql`, `npx wrangler dev --port 8834`. 화면은 localhost에서 열면 8834를 부른다.
 
+## 행선지 화면 따라가기
+
+`index.html` 은 손으로 고치지 않는다. 행선지 `index.html` 에 `build/port/port.py` 를 돌려 만든다 — 지도 부분은 `globe-block.js`(지구본), 찾기는 `search-block.js`(옛 이름), 정답 모양은 `shape-block.js` 로 갈아 끼우고 나머지는 문구·색만 바꾼다.
+
+```sh
+python3 build/port/port.py ../wheretogo/index.html index.html build/port/globe-block.js build/port/search-block.js build/port/shape-block.js
+```
+
 ## 데이터 다시 만들기
 
 ```sh
