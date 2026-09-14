@@ -78,13 +78,13 @@ function draw(){
   placeMarks();
 }
 
-/* 이지 모드 — 올라간 나라를 마우스 자리를 중심으로 1.14배 키워 칠한다.
+/* 이지 모드 — 올라간 나라를 마우스 자리를 중심으로 살짝(1.04배) 키워 칠한다. 그림자는 없다 —
+   지구본 위에 떠 보이지 않고 제자리에서 도드라지게.
    같은 회전에 크기만 키우고, 마우스 자리가 제자리에 오게 가운데를 옮긴 투영으로 한 번 더 그린다 */
 function drawHover(){
-  var f = FEAT[HOVI], k = proj.scale(), t = proj.translate(), z = 1.14;
+  var f = FEAT[HOVI], k = proj.scale(), t = proj.translate(), z = 1.04;
   proj.scale(k * z).translate([t[0] + (HOVXY[0] - t[0]) * (1 - z), t[1] + (HOVXY[1] - t[1]) * (1 - z)]);
   ctx.save();
-  ctx.shadowColor = 'rgba(0,0,0,.28)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 2;
   ctx.beginPath(); gpath(f); ctx.globalAlpha = .85; ctx.fillStyle = PAL.accent; ctx.fill();
   ctx.restore();
   ctx.beginPath(); gpath(f); ctx.strokeStyle = PAL.ink; ctx.lineWidth = 1.6; ctx.stroke();
