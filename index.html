@@ -107,6 +107,11 @@ header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
   padding-bottom:12px;border-bottom:5px solid var(--accent);margin-bottom:18px}
 .back{display:inline-block;font-size:12.5px;color:var(--faint);text-decoration:none;margin-bottom:6px}
 .back:hover{color:var(--accent)}
+.toplinks{display:flex;gap:14px;align-items:baseline}
+.home{border:0;background:none;padding:0;font:inherit;font-size:12.5px;color:var(--faint);margin-bottom:6px;cursor:pointer}
+.home:hover{color:var(--accent)}
+#toTitle{cursor:pointer}
+#toTitle:hover .ttl{color:var(--accent)}
 h1{margin:0;font-family:var(--display);font-size:clamp(28px,5.6vw,38px);font-weight:400;letter-spacing:-.01em;line-height:1.1;display:flex;align-items:baseline;gap:10px}
 h1 .w{font-family:var(--mono);font-size:.46em;font-weight:600;color:var(--accent);letter-spacing:.06em}
 h1 .no{font-family:var(--mono);font-size:.4em;font-weight:400;color:var(--faint);letter-spacing:.02em}
@@ -298,8 +303,11 @@ dialog::backdrop{background:rgba(17,17,17,.38)}
   <div id="game" hidden>
   <header>
     <div>
-      <a class="back" href="https://41ways.github.io/norara/">← 레드버튼</a>
-      <h1><span>행선지<span style="color:var(--accent)">2</span></span> <span class="w">WORLD</span> <span class="no" id="no"></span></h1>
+      <div class="toplinks">
+        <a class="back" href="https://41ways.github.io/norara/">← 레드버튼</a>
+        <button class="home" id="btnHome" type="button">⌂ 처음으로</button>
+      </div>
+      <h1 id="toTitle" title="처음으로"><span class="ttl">행선지<span style="color:var(--accent)">2</span></span> <span class="w">WORLD</span> <span class="no" id="no"></span></h1>
       <p class="sub">가까운 순서만 보고 오늘의 나라를 맞히세요.</p>
     </div>
     <div class="hud">
@@ -590,17 +598,14 @@ function draw(){
   placeMarks();
 }
 
-/* 이지 모드 — 올라간 나라를 마우스 자리를 중심으로 살짝(1.04배) 키워 칠한다. 그림자는 없다 —
-   지구본 위에 떠 보이지 않고 제자리에서 도드라지게.
-   같은 회전에 크기만 키우고, 마우스 자리가 제자리에 오게 가운데를 옮긴 투영으로 한 번 더 그린다 */
+/* 이지 모드 — 올라간 나라를 제자리에서 칠하고 테두리를 굵게 해 강조한다.
+   크기는 키우지 않는다 — 마우스 자리를 기준으로 키우면 마우스를 따라 모양이 밀려다닌다 */
 function drawHover(){
-  var f = FEAT[HOVI], k = proj.scale(), t = proj.translate(), z = 1.04;
-  proj.scale(k * z).translate([t[0] + (HOVXY[0] - t[0]) * (1 - z), t[1] + (HOVXY[1] - t[1]) * (1 - z)]);
+  var f = FEAT[HOVI];
   ctx.save();
   ctx.beginPath(); gpath(f); ctx.globalAlpha = .85; ctx.fillStyle = PAL.accent; ctx.fill();
   ctx.restore();
   ctx.beginPath(); gpath(f); ctx.strokeStyle = PAL.ink; ctx.lineWidth = 1.6; ctx.stroke();
-  proj.scale(k).translate(t);
 }
 /* 화면 한 점 아래의 나라. 경계 상자로 먼저 거르고 d3.geoContains 로 확인한다 */
 function featureAt(xy){
@@ -615,9 +620,9 @@ function featureAt(xy){
   return null;
 }
 function setHov(i, xy){
-  var same = HOVI === i;
+  if (HOVI === i) return;                       // 같은 나라 안에서 움직이면 다시 그리지 않는다
   HOVI = i; HOVXY = i == null ? null : xy;
-  if (!same || i != null) queueDraw();
+  queueDraw();
 }
 
 /* 지구 앞면에 있나 — 화면 가운데 점에서 90° 안쪽 */
@@ -1148,6 +1153,20 @@ function backToTitle(){
   titleFinished();
   scrollTo(0, 0);
 }
+/* 게임 화면에서 타이틀로 — 처음으로 단추와 제목 누르기.
+   연습 판(이지·무한)은 접고 오늘 판을 되돌린다. 오늘 판은 그대로 두니 이어서 할 수 있다
+   (시계는 서버가 첫 추측부터 재므로 타이틀에 있는 동안에도 흐른다) */
+function goTitle(){
+  if (S.busy) return;
+  if (S.free) { endFree(); return; }
+  var d = $('#dlgDone'); if (d.open) d.close();
+  if (!$('#title').hidden) return;
+  $('#game').hidden = true; $('#title').hidden = false;
+  if (S.solved || S.gaveup) titleFinished();
+  else { $('#btnStart').disabled = false; $('#btnStart').textContent = S.list.length ? '이어서 하기' : '시작'; }
+  renderFreeStat();
+  scrollTo(0, 0);
+}
 /* 타이틀을 "오늘은 끝" 상태로 */
 function titleFinished(){
   var b = $('#btnStart');
@@ -1278,6 +1297,8 @@ $('#tabBest').addEventListener('click', function(){ openBoard('best'); });
 $('#btnHelp2').addEventListener('click', function(){ $('#dlgHelp').showModal(); });
 $('#btnBoard2').addEventListener('click', function(){ openBoard('today'); });
 $('#btnGiveup').addEventListener('click', giveup);
+$('#btnHome').addEventListener('click', goTitle);
+$('#toTitle').addEventListener('click', goTitle);
 $('#btnHelp').addEventListener('click', function(){ $('#dlgHelp').showModal(); });
 $('#btnBoard').addEventListener('click', function(){ openBoard('today'); });
 document.querySelectorAll('[data-close]').forEach(function(b){ b.addEventListener('click', function(){ b.closest('dialog').close(); }); });

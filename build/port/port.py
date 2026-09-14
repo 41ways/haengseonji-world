@@ -58,7 +58,7 @@ rep('''    <p class="lede">전국 시·군 <b id="tn">165</b>곳 가운데 오�
       거리는 비밀입니다.</p>''')
 
 # ── 게임 머리·지도·입력
-rep('<h1>행선지 <span class="no" id="no"></span></h1>', '<h1><span>행선지<span style="color:var(--accent)">2</span></span> <span class="w">WORLD</span> <span class="no" id="no"></span></h1>')
+rep('<h1 id="toTitle" title="처음으로"><span class="ttl">행선지</span> <span class="no" id="no"></span></h1>', '<h1 id="toTitle" title="처음으로"><span class="ttl">행선지<span style="color:var(--accent)">2</span></span> <span class="w">WORLD</span> <span class="no" id="no"></span></h1>')
 rep('<p class="sub">가까운 순서만 보고 오늘의 시·군을 맞히세요.</p>', '<p class="sub">가까운 순서만 보고 오늘의 나라를 맞히세요.</p>')
 rep('''        <svg id="map" role="img" aria-label="전국 시·군 지도"></svg>
         <div id="marks"></div>''', '''        <canvas id="globe" role="img" aria-label="지구본"></canvas>

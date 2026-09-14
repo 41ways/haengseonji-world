@@ -78,17 +78,14 @@ function draw(){
   placeMarks();
 }
 
-/* 이지 모드 — 올라간 나라를 마우스 자리를 중심으로 살짝(1.04배) 키워 칠한다. 그림자는 없다 —
-   지구본 위에 떠 보이지 않고 제자리에서 도드라지게.
-   같은 회전에 크기만 키우고, 마우스 자리가 제자리에 오게 가운데를 옮긴 투영으로 한 번 더 그린다 */
+/* 이지 모드 — 올라간 나라를 제자리에서 칠하고 테두리를 굵게 해 강조한다.
+   크기는 키우지 않는다 — 마우스 자리를 기준으로 키우면 마우스를 따라 모양이 밀려다닌다 */
 function drawHover(){
-  var f = FEAT[HOVI], k = proj.scale(), t = proj.translate(), z = 1.04;
-  proj.scale(k * z).translate([t[0] + (HOVXY[0] - t[0]) * (1 - z), t[1] + (HOVXY[1] - t[1]) * (1 - z)]);
+  var f = FEAT[HOVI];
   ctx.save();
   ctx.beginPath(); gpath(f); ctx.globalAlpha = .85; ctx.fillStyle = PAL.accent; ctx.fill();
   ctx.restore();
   ctx.beginPath(); gpath(f); ctx.strokeStyle = PAL.ink; ctx.lineWidth = 1.6; ctx.stroke();
-  proj.scale(k).translate(t);
 }
 /* 화면 한 점 아래의 나라. 경계 상자로 먼저 거르고 d3.geoContains 로 확인한다 */
 function featureAt(xy){
@@ -103,9 +100,9 @@ function featureAt(xy){
   return null;
 }
 function setHov(i, xy){
-  var same = HOVI === i;
+  if (HOVI === i) return;                       // 같은 나라 안에서 움직이면 다시 그리지 않는다
   HOVI = i; HOVXY = i == null ? null : xy;
-  if (!same || i != null) queueDraw();
+  queueDraw();
 }
 
 /* 지구 앞면에 있나 — 화면 가운데 점에서 90° 안쪽 */
