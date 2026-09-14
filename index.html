@@ -15,10 +15,10 @@
 <style>
 :root{
   --bg:#f6f5f2; --panel:#ffffff; --line:#dedcd6; --ink:#111111;
-  --dim:#5a5854; --faint:#928f89; --accent:#e0301e; --accent-soft:#fae2de;
-  --land:#e8e7e2; --land-off:#dddcd6; --land-line:#c7c5be; --sea:#f1f0ec;
+  --dim:#5a5854; --faint:#928f89; --accent:#2447d6; --accent-soft:#e2e7fb;
+  --land:#e8e7e2; --land-off:#dcdcd8; --land-line:#c5c6c4; --sea:#eaeff5;
   --red:#e0301e; --good:#1b7a4b;
-  --rule:#111111; --stamp:#e0301e;
+  --rule:#111111; --stamp:#2447d6;
   --shadow:none;
   --display:"Black Han Sans","Gothic A1",sans-serif;
   --serif:"Gothic A1",system-ui,sans-serif;
@@ -27,10 +27,10 @@
 @media (prefers-color-scheme:dark){
   :root{
     --bg:#121211; --panel:#1a1a18; --line:#302f2c; --ink:#f2f1ee;
-    --dim:#a5a29c; --faint:#7a7772; --accent:#ff4a38; --accent-soft:#38201c;
-    --land:#34332f; --land-off:#282825; --land-line:#57554f; --sea:#0d0d0c;
+    --dim:#a5a29c; --faint:#7a7772; --accent:#6f8dff; --accent-soft:#1b2342;
+    --land:#34332f; --land-off:#282825; --land-line:#57554f; --sea:#0c0f16;
     --red:#ff4a38; --good:#5fc88a;
-    --rule:#f2f1ee; --stamp:#ff4a38;
+    --rule:#f2f1ee; --stamp:#6f8dff;
     --shadow:none;
   }
 }
@@ -55,7 +55,7 @@ button{cursor:pointer}
 .title .back{position:absolute;left:0;top:0;margin:0}
 .stamp{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.24em;
   color:var(--accent);border:1.5px solid var(--accent);padding:4px 11px 3px}
-.redbar{width:min(620px,84%);height:8px;background:var(--accent);margin-top:30px}
+.redbar{width:min(620px,84%);height:13px;margin-top:30px;background:linear-gradient(var(--accent) 0 8px,transparent 8px 11px,var(--accent) 11px 13px)}
 .bigname .two{color:var(--accent)}
 .bigname{font-family:var(--display);margin:20px 0 0;font-weight:400;
   font-size:clamp(58px,15vw,132px);letter-spacing:-.02em;line-height:.95}
@@ -153,7 +153,7 @@ h1 .no{font-family:var(--mono);font-size:.4em;font-weight:400;color:var(--faint)
 .zoom button:hover{border-color:var(--accent);color:var(--accent)}
 .maphint{position:absolute;left:10px;bottom:8px;font-size:10.5px;color:var(--faint);letter-spacing:.1em;pointer-events:none}
 .legend{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--faint);margin:8px 4px 0}
-.legend i{flex:1;height:6px;background:linear-gradient(90deg,#e0301e,#e96e5a 28%,#f0b6aa 60%,#b9b7b0)}
+.legend i{flex:1;height:6px;background:linear-gradient(90deg,#2447d6,#6280e6 28%,#b2c2f0 60%,#b9b7b0)}
 .credit{font-size:10.5px;color:var(--faint);margin:6px 4px 0;opacity:.8}
 
 /* ── 부르기 ── */
@@ -195,7 +195,7 @@ h1 .no{font-family:var(--mono);font-size:.4em;font-weight:400;color:var(--faint)
 .done .big{font-family:var(--mono);font-size:15px;color:var(--ink);font-weight:600;letter-spacing:-.02em}
 .shape{display:block;width:auto;height:clamp(92px,24vw,128px);margin:0 auto 14px}
 .shape path{fill:var(--ink)}
-.shape circle{fill:var(--accent);stroke:var(--panel);stroke-width:1.2px;vector-effect:non-scaling-stroke}
+.shape circle{fill:var(--red);stroke:var(--panel);stroke-width:1.2px;vector-effect:non-scaling-stroke}
 .shapecap{margin:-8px 0 12px;text-align:center;font-size:10.5px;color:var(--faint);letter-spacing:.12em}
 .row{display:flex;gap:8px;flex-wrap:wrap}
 .row input{flex:1;min-width:120px;padding:9px 12px;border:1.5px solid var(--ink);background:var(--panel);outline:none}
@@ -438,7 +438,7 @@ function renderFreeStat(){
 }
 
 // ══════════════════════════════ 색
-var STOPS = [[0,[185,183,176]],[.55,[240,182,170]],[.82,[233,110,90]],[1,[224,48,30]]];
+var STOPS = [[0,[185,183,176]],[.55,[178,194,240]],[.82,[98,128,230]],[1,[36,71,214]]];
 function heat(rank){
   var t = rank <= 0 ? 1 : 1 - (rank - 1) / (S.n - 2);
   for (var i = 1; i < STOPS.length; i++) {
@@ -447,7 +447,7 @@ function heat(rank){
       return 'rgb(' + a[1].map(function(v, j){ return Math.round(v + (b[1][j] - v) * k); }).join(',') + ')';
     }
   }
-  return 'rgb(214,47,47)';
+  return 'rgb(36,71,214)';
 }
 function word(rank){
   if (rank === 0) return '정답';
@@ -929,7 +929,7 @@ function saveName(){
 }
 
 function share(){
-  var sq = S.list.map(function(g){ return g.correct ? '📍' : g.rank <= 5 ? '🟥' : g.rank <= 25 ? '🟧' : '⬜'; });
+  var sq = S.list.map(function(g){ return g.correct ? '📍' : g.rank <= 5 ? '🟦' : g.rank <= 25 ? '🔷' : '⬜'; });
   if (sq.length > 24) sq = sq.slice(0, 11).concat(['…']).concat(sq.slice(-12));
   var mine = S.board && S.board.mine;
   var t = '행선지2: World 제' + S.no + '호 — ' + fmtKo(S.elapsed) + ', ' + S.list.length + '번 만에' + (mine ? ' (' + mine.rank + '위)' : '') + '\n' + sq.join('') + '\n' + SHARE_URL;
@@ -1010,7 +1010,7 @@ function openBoard(which){
 function celebrate(){
   if (matchMedia('(prefers-reduced-motion:reduce)').matches) return;
   var css = getComputedStyle(document.documentElement);
-  var hues = [css.getPropertyValue('--accent').trim() || '#e0301e',
+  var hues = [css.getPropertyValue('--accent').trim() || '#2447d6',
               css.getPropertyValue('--ink').trim() || '#111111',
               css.getPropertyValue('--faint').trim() || '#928f89'];
   var cv = document.createElement('canvas');
