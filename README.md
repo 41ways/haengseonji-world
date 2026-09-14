@@ -3,7 +3,7 @@
 정답 수도에 가까운 순서로 매긴 점수(100점 만점)만 보고 오늘의 나라를 맞히는 하루 한 문제 게임. 제일 빨리 맞힌 사람이 1등.
 [행선지](https://github.com/41ways/wheretogo)(시·군판)의 세계판이다. 화면·서버 틀은 행선지를 그대로 가져왔고, 강조색만 군청으로 갈랐다.
 
-**하기 → https://41ways.github.io/haengseonji-world/**
+**하기 → https://41ways.github.io/wheretogo-world/**
 
 - 매일 자정(KST)에 199곳 중 한 나라가 정답 — 유엔 회원국 193 + 바티칸·팔레스타인·대만·코소보 + 홍콩·마카오
 - 부른 나라의 **수도**가 정답 수도에서 **몇 번째로 가까운지**와, 그 순서로 매긴 점수를 알려 줌
@@ -21,7 +21,7 @@
 |---|---|
 | `index.html`, `map.json` | 게임 화면 (GitHub Pages). `map.json` 은 위경도 0.01° 정수 차분 |
 | `data/units.json` | 199곳 이름·수도 좌표 (서버가 씀) |
-| `worker/` | 정답·점수·순위 서버 — Cloudflare Worker `haengseonji-world` + D1 `haengseonji-world` |
+| `worker/` | 정답·점수·순위 서버 — Cloudflare Worker `haengseonji-world` + D1 `haengseonji-world` (저장소를 wheretogo-world 로 바꿨어도 서버 주소가 끊기지 않게 옛 이름 그대로) |
 | `build/` | 나라 목록·수도·경계 데이터를 만드는 스크립트 |
 
 정답은 서버만 안다. 비밀값 `ANSWER_SALT`로 섞은 순서에서 날짜별로 꺼낸다. 행선지와 Worker·D1·비밀값·플레이어 명부는 따로다.

@@ -93,7 +93,7 @@ block('      <li>매일 자정(한국 시간)에 전국 <b>시·군 165곳</b>',
 # ── 스크립트: 주소·저장 키
 rep("var API = /^(localhost|127\\.0\\.0\\.1)$/.test(location.hostname) ? 'http://localhost:8832' : 'https://eodigun.41ways.workers.dev';",
     "var API = /^(localhost|127\\.0\\.0\\.1)$/.test(location.hostname) ? 'http://localhost:8834' : 'https://haengseonji-world.41ways.workers.dev';")
-rep("var SHARE_URL = 'https://41ways.github.io/wheretogo/';", "var SHARE_URL = 'https://41ways.github.io/haengseonji-world/';")
+rep("var SHARE_URL = 'https://41ways.github.io/wheretogo/';", "var SHARE_URL = 'https://41ways.github.io/wheretogo-world/';")
 rep("'eodigun-pid'", "'hsj2-pid'", 2)
 rep("'eodigun-name'", "'hsj2-name'", 3)
 rep("'eodigun-pw'", "'hsj2-pw'", 2)
