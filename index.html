@@ -864,13 +864,14 @@ function moveSug(d){
   sugSel = (sugSel + d + sugIdx.length) % sugIdx.length;
   sugMoved = true;
   Array.prototype.forEach.call($('#sug').children, function(li, k){ li.setAttribute('aria-selected', k === sugSel); });
-  var on = $('#sug').children[sugSel]; if (on) on.scrollIntoView({ block:'nearest' });   // 긴 대륙 목록에서 고른 줄이 안 보이지 않게
+  var on = $('#sug').children[sugSel]; if (on) on.scrollIntoView({ block:'nearest' });   // 긴 목록에서 고른 줄이 안 보이지 않게
 }
 function submit(){
   var q = $('#q').value.trim();
   if (!q) return;
   if (!sugIdx.length) sugIdx = search(q);
   if (!sugIdx.length) { msg('"' + q + '" — 그런 나라는 목록에 없습니다', true); return; }
+  /* 도·권역 이름만 친 채 Enter 는 목록 첫 곳을 부르지 않는다 — 골라야 부른다 */
   if (regionQuery(q) && !sugMoved) { msg(q + ' ' + sugIdx.length + '곳 — 목록에서 골라 누르세요 (방향키로 고르고 Enter)'); renderSug(); return; }
   guess(sugIdx[Math.min(sugSel, sugIdx.length - 1)]);
 }
@@ -1294,7 +1295,7 @@ function load(){
   });
 }
 
-fetch('map.json').then(function(r){ return r.json(); }).then(function(m){
+fetch('map.json?v=3f6e035987').then(function(r){ return r.json(); }).then(function(m){
   M = m; U = m.units;
   U.forEach(function(u, i){
     BY[u.id] = i;

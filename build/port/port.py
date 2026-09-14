@@ -71,7 +71,7 @@ rep('''        <svg id="map" role="img" aria-label="전국 시·군 지도"></sv
         <div class="maphint" id="maphint">끌어서 돌리기 · 휠 · 두 손가락으로 확대</div>''')
 rep('<div class="credit">경계 vuski/admdongkor (2026.7.1 행정동) · 청사 위치 © OpenStreetMap 기여자</div>',
     '<div class="credit">경계·수도 Natural Earth · 나라 목록 mledoze/countries</div>')
-rep('placeholder="시·군 이름 (수원, 제주, ㅊㅊ …)"', 'placeholder="나라 이름 (프랑스, 일본, ㅂㄹㅈ …)"')
+rep('placeholder="시·군 이름 (수원, 경기, ㅊㅊ …)"', 'placeholder="나라 이름 (프랑스, 유럽, ㅂㄹㅈ …)"')
 rep('<thead><tr><th>#</th><th>시·군</th>', '<thead><tr><th>#</th><th>나라</th>')
 rep('<div class="empty" id="empty">아무 데나 하나 불러 보세요.<br>점수를 보고 좁혀 가면 됩니다.</div>',
     '<div class="empty" id="empty">아무 나라나 하나 불러 보세요.<br>점수를 보고 좁혀 가면 됩니다.</div>')
@@ -107,7 +107,7 @@ rep("  if (rank <= 70) return '그럭저럭';\n  if (rank <= 120) return '멂';\
 # ── 지도 그리기 (확대·이동)
 block('// ══════════════════════════════ 지도\n', '// ══════════════════════════════ 찾기 (이름·초성)', open(sys.argv[3], encoding='utf-8').read())
 # ── 찾기 (별칭 포함)
-block('// ══════════════════════════════ 찾기 (이름·초성)', 'var sugIdx = [], sugSel = 0;', open(sys.argv[4], encoding='utf-8').read())
+block('// ══════════════════════════════ 찾기 (이름·초성)', 'var sugIdx = [], sugSel = 0', open(sys.argv[4], encoding='utf-8').read())
 # 옛 이름(불란서)으로 찾아도 목록에는 본이름과 지역만 — 프랑스 · 유럽
 rep("msg('\"' + q + '\" — 그런 시·군은 없습니다', true);", "msg('\"' + q + '\" — 그런 나라는 목록에 없습니다', true);")
 rep("msg(easy ? easyHint() : '어디든 하나 불러서 시작하세요.');", "msg(easy ? easyHint() : '아무 나라나 불러서 출발하세요.');")
@@ -157,17 +157,13 @@ rep("css.getPropertyValue('--accent').trim() || '#e0301e'", "css.getPropertyValu
 rep('.redbar{width:min(620px,84%);height:8px;background:var(--accent);margin-top:30px}',
     '.redbar{width:min(620px,84%);height:13px;margin-top:30px;background:linear-gradient(var(--accent) 0 8px,transparent 8px 11px,var(--accent) 11px 13px)}')
 rep('.shape circle{fill:var(--accent);', '.shape circle{fill:var(--red);')
-# ── 대륙 이름으로 찾기: 대륙만 친 채 Enter 는 아무 나라나 부르지 않는다 (골라야 부름)
-rep('var sugIdx = [], sugSel = 0;', 'var sugIdx = [], sugSel = 0, sugMoved = false;   // sugMoved: 방향키로 골랐나')
-rep('  sugIdx = search(q); sugSel = 0;\n', '  sugIdx = search(q); sugSel = 0; sugMoved = false;\n')
-rep("  sugSel = (sugSel + d + sugIdx.length) % sugIdx.length;\n", "  sugSel = (sugSel + d + sugIdx.length) % sugIdx.length;\n  sugMoved = true;\n")
-rep("  Array.prototype.forEach.call($('#sug').children, function(li, k){ li.setAttribute('aria-selected', k === sugSel); });\n}",
-    "  Array.prototype.forEach.call($('#sug').children, function(li, k){ li.setAttribute('aria-selected', k === sugSel); });\n  var on = $('#sug').children[sugSel]; if (on) on.scrollIntoView({ block:'nearest' });   // 긴 대륙 목록에서 고른 줄이 안 보이지 않게\n}")
-rep("  if (!sugIdx.length) sugIdx = search(q);\n  if (!sugIdx.length) { msg('\"' + q + '\" — 그런 나라는 목록에 없습니다', true); return; }\n",
-    "  if (!sugIdx.length) sugIdx = search(q);\n  if (!sugIdx.length) { msg('\"' + q + '\" — 그런 나라는 목록에 없습니다', true); return; }\n" +
-    "  if (regionQuery(q) && !sugMoved) { msg(q + ' ' + sugIdx.length + '곳 — 목록에서 골라 누르세요 (방향키로 고르고 Enter)'); renderSug(); return; }\n")
-rep('placeholder="나라 이름 (프랑스, 일본, ㅂㄹㅈ …)"', 'placeholder="나라 이름 (프랑스, 유럽, ㅂㄹㅈ …)"')
+# ── 지역 이름으로 찾기: Enter 가드·목록 따라가기는 행선지 원본에 있고, regionQuery 는 search-block.js 가 World 용으로 바꿔 끼운다
+
 rep("      <li>옛 이름으로도 찾을 수 있습니다 — 터키, 스와질란드, 버마. 초성도 됩니다 — <b>ㅂㄹㅈ</b> → 브라질.</li>",
     "      <li>옛 이름으로도 찾을 수 있습니다 — 터키, 스와질란드, 버마. 옛 한자 이름도 됩니다 — <b>불란서</b>, <b>화란</b>, <b>이태리</b>, <b>월남</b>. 초성도 됩니다 — <b>ㅂㄹㅈ</b> → 브라질.</li>\n      <li>지역 이름을 치면 그 지역 나라가 모두 나옵니다 — 대륙(<b>유럽</b>, <b>아시아</b> …)과 <b>북미</b>·<b>중미</b>·<b>남미</b>·<b>카리브</b>, <b>동아시아</b>·<b>동남아</b>·<b>중동</b>·<b>중앙아시아</b>, <b>북유럽</b>·<b>서유럽</b>·<b>동유럽</b>·<b>발칸</b>, <b>북아프리카</b>·<b>서아프리카</b> 같은 말.</li>")
+# ── map.json 캐시 깨기: 내용 해시를 주소에 붙인다. 새 화면이 캐시에 남은 옛 map.json 을 읽는 일이 없게
+import hashlib, os
+_mv = hashlib.sha1(open(os.path.join(os.path.dirname(os.path.abspath(DST)), 'map.json'), 'rb').read()).hexdigest()[:10]
+rep("fetch('map.json')", "fetch('map.json?v=" + _mv + "')")
 open(DST, 'w', encoding='utf-8').write(s)
 print('ok', len(s))
