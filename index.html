@@ -336,7 +336,7 @@ dialog::backdrop{background:rgba(17,17,17,.38)}
     <section class="card ask">
       <div id="askform">
         <form class="field" id="askf" autocomplete="off">
-          <input id="q" type="text" placeholder="나라 이름 (프랑스, 일본, ㅂㄹㅈ …)" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="go" aria-autocomplete="list" aria-controls="sug" disabled>
+          <input id="q" type="text" placeholder="나라 이름 (프랑스, 유럽, ㅂㄹㅈ …)" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="go" aria-autocomplete="list" aria-controls="sug" disabled>
           <button class="go" id="go" type="submit" disabled>부르기</button>
           <ul class="sug" id="sug" role="listbox" hidden></ul>
         </form>
@@ -387,6 +387,7 @@ dialog::backdrop{background:rgba(17,17,17,.38)}
       <li>199곳 = 유엔 회원국 193 + 바티칸·팔레스타인·대만·코소보 + <b>홍콩·마카오</b>. 괌·그린란드 같은 속령은 따로 치지 않습니다.</li>
       <li>수도가 여럿이면 공식 수도로 잽니다 — 볼리비아 <b>수크레</b>, 네덜란드 <b>암스테르담</b>, 남아공 <b>프리토리아</b>, 스리랑카 <b>스리자야와르데네푸라코테</b>.</li>
       <li>옛 이름으로도 찾을 수 있습니다 — 터키, 스와질란드, 버마. 초성도 됩니다 — <b>ㅂㄹㅈ</b> → 브라질.</li>
+      <li>대륙 이름을 치면 그 대륙 나라가 모두 나옵니다 — <b>유럽</b>, <b>아시아</b>, <b>아프리카</b>, <b>북아메리카</b>, <b>남아메리카</b>, <b>오세아니아</b> (<b>아메리카</b>는 남북 둘 다).</li>
       <li>지도는 휠이나 두 손가락으로 확대하고, 끌어서 옮깁니다.</li>
     </ul>
   </div>
@@ -782,7 +783,19 @@ function cho(s){
   }).join('');
 }
 function norm(s){ return String(s).replace(/\s+/g, '').toLowerCase(); }
+/* 대륙 이름을 끝까지 치면 그 대륙 나라를 전부 가나다순으로 보여 준다 — 유럽 → 47곳.
+   중간까지만 친 "아프" 는 나라 이름(아프가니스탄)으로 찾는다 */
+var REGIONS = ['아시아', '유럽', '아프리카', '북아메리카', '남아메리카', '오세아니아'];
+function regionQuery(q){
+  q = norm(q);
+  if (q === '아메리카' || q === '미주') return ['북아메리카', '남아메리카'];
+  return REGIONS.indexOf(q) >= 0 ? [q] : null;
+}
 function search(q){
+  var rg = regionQuery(q);
+  if (rg) return U.map(function(u, i){ return i; })
+    .filter(function(i){ return rg.indexOf(U[i].reg) >= 0; })
+    .sort(function(a, b){ return U[a].name < U[b].name ? -1 : 1; });
   q = norm(q);
   if (!q) return [];
   var onlyCho = /^[ㄱ-ㅎ]+$/.test(q), out = [];
@@ -801,10 +814,10 @@ function search(q){
   return out.slice(0, 8).map(function(x){ return x[2]; });
 }
 
-var sugIdx = [], sugSel = 0;
+var sugIdx = [], sugSel = 0, sugMoved = false;   // sugMoved: 방향키로 골랐나
 function renderSug(){
   var q = $('#q').value, box = $('#sug');
-  sugIdx = search(q); sugSel = 0;
+  sugIdx = search(q); sugSel = 0; sugMoved = false;
   if (!sugIdx.length || S.solved || S.gaveup) { box.hidden = true; return; }
   var nq = norm(q);
   box.innerHTML = sugIdx.map(function(i, k){
@@ -821,13 +834,16 @@ function renderSug(){
 function moveSug(d){
   if (!sugIdx.length) return;
   sugSel = (sugSel + d + sugIdx.length) % sugIdx.length;
+  sugMoved = true;
   Array.prototype.forEach.call($('#sug').children, function(li, k){ li.setAttribute('aria-selected', k === sugSel); });
+  var on = $('#sug').children[sugSel]; if (on) on.scrollIntoView({ block:'nearest' });   // 긴 대륙 목록에서 고른 줄이 안 보이지 않게
 }
 function submit(){
   var q = $('#q').value.trim();
   if (!q) return;
   if (!sugIdx.length) sugIdx = search(q);
   if (!sugIdx.length) { msg('"' + q + '" — 그런 나라는 목록에 없습니다', true); return; }
+  if (regionQuery(q) && !sugMoved) { msg(q + ' ' + sugIdx.length + '곳 — 목록에서 골라 누르세요 (방향키로 고르고 Enter)'); renderSug(); return; }
   guess(sugIdx[Math.min(sugSel, sugIdx.length - 1)]);
 }
 

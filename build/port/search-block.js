@@ -7,7 +7,19 @@ function cho(s){
   }).join('');
 }
 function norm(s){ return String(s).replace(/\s+/g, '').toLowerCase(); }
+/* 대륙 이름을 끝까지 치면 그 대륙 나라를 전부 가나다순으로 보여 준다 — 유럽 → 47곳.
+   중간까지만 친 "아프" 는 나라 이름(아프가니스탄)으로 찾는다 */
+var REGIONS = ['아시아', '유럽', '아프리카', '북아메리카', '남아메리카', '오세아니아'];
+function regionQuery(q){
+  q = norm(q);
+  if (q === '아메리카' || q === '미주') return ['북아메리카', '남아메리카'];
+  return REGIONS.indexOf(q) >= 0 ? [q] : null;
+}
 function search(q){
+  var rg = regionQuery(q);
+  if (rg) return U.map(function(u, i){ return i; })
+    .filter(function(i){ return rg.indexOf(U[i].reg) >= 0; })
+    .sort(function(a, b){ return U[a].name < U[b].name ? -1 : 1; });
   q = norm(q);
   if (!q) return [];
   var onlyCho = /^[ㄱ-ㅎ]+$/.test(q), out = [];

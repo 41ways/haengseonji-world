@@ -167,5 +167,17 @@ rep("css.getPropertyValue('--accent').trim() || '#e0301e'", "css.getPropertyValu
 rep('.redbar{width:min(620px,84%);height:8px;background:var(--accent);margin-top:30px}',
     '.redbar{width:min(620px,84%);height:13px;margin-top:30px;background:linear-gradient(var(--accent) 0 8px,transparent 8px 11px,var(--accent) 11px 13px)}')
 rep('.shape circle{fill:var(--accent);', '.shape circle{fill:var(--red);')
+# ── 대륙 이름으로 찾기: 대륙만 친 채 Enter 는 아무 나라나 부르지 않는다 (골라야 부름)
+rep('var sugIdx = [], sugSel = 0;', 'var sugIdx = [], sugSel = 0, sugMoved = false;   // sugMoved: 방향키로 골랐나')
+rep('  sugIdx = search(q); sugSel = 0;\n', '  sugIdx = search(q); sugSel = 0; sugMoved = false;\n')
+rep("  sugSel = (sugSel + d + sugIdx.length) % sugIdx.length;\n", "  sugSel = (sugSel + d + sugIdx.length) % sugIdx.length;\n  sugMoved = true;\n")
+rep("  Array.prototype.forEach.call($('#sug').children, function(li, k){ li.setAttribute('aria-selected', k === sugSel); });\n}",
+    "  Array.prototype.forEach.call($('#sug').children, function(li, k){ li.setAttribute('aria-selected', k === sugSel); });\n  var on = $('#sug').children[sugSel]; if (on) on.scrollIntoView({ block:'nearest' });   // 긴 대륙 목록에서 고른 줄이 안 보이지 않게\n}")
+rep("  if (!sugIdx.length) sugIdx = search(q);\n  if (!sugIdx.length) { msg('\"' + q + '\" — 그런 나라는 목록에 없습니다', true); return; }\n",
+    "  if (!sugIdx.length) sugIdx = search(q);\n  if (!sugIdx.length) { msg('\"' + q + '\" — 그런 나라는 목록에 없습니다', true); return; }\n" +
+    "  if (regionQuery(q) && !sugMoved) { msg(q + ' ' + sugIdx.length + '곳 — 목록에서 골라 누르세요 (방향키로 고르고 Enter)'); renderSug(); return; }\n")
+rep('placeholder="나라 이름 (프랑스, 일본, ㅂㄹㅈ …)"', 'placeholder="나라 이름 (프랑스, 유럽, ㅂㄹㅈ …)"')
+rep("      <li>옛 이름으로도 찾을 수 있습니다 — 터키, 스와질란드, 버마. 초성도 됩니다 — <b>ㅂㄹㅈ</b> → 브라질.</li>",
+    "      <li>옛 이름으로도 찾을 수 있습니다 — 터키, 스와질란드, 버마. 초성도 됩니다 — <b>ㅂㄹㅈ</b> → 브라질.</li>\n      <li>대륙 이름을 치면 그 대륙 나라가 모두 나옵니다 — <b>유럽</b>, <b>아시아</b>, <b>아프리카</b>, <b>북아메리카</b>, <b>남아메리카</b>, <b>오세아니아</b> (<b>아메리카</b>는 남북 둘 다).</li>")
 open(DST, 'w', encoding='utf-8').write(s)
 print('ok', len(s))
