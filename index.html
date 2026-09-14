@@ -386,8 +386,8 @@ dialog::backdrop{background:rgba(17,17,17,.38)}
       <li>시계는 <b>첫 추측부터</b> 정답까지 서버가 잽니다. 순위는 빠른 순, 시간이 같으면 적게 부른 순입니다. 포기하면 순위에 오르지 않습니다.</li>
       <li>199곳 = 유엔 회원국 193 + 바티칸·팔레스타인·대만·코소보 + <b>홍콩·마카오</b>. 괌·그린란드 같은 속령은 따로 치지 않습니다.</li>
       <li>수도가 여럿이면 공식 수도로 잽니다 — 볼리비아 <b>수크레</b>, 네덜란드 <b>암스테르담</b>, 남아공 <b>프리토리아</b>, 스리랑카 <b>스리자야와르데네푸라코테</b>.</li>
-      <li>옛 이름으로도 찾을 수 있습니다 — 터키, 스와질란드, 버마. 초성도 됩니다 — <b>ㅂㄹㅈ</b> → 브라질.</li>
-      <li>대륙 이름을 치면 그 대륙 나라가 모두 나옵니다 — <b>유럽</b>, <b>아시아</b>, <b>아프리카</b>, <b>북아메리카</b>, <b>남아메리카</b>, <b>오세아니아</b> (<b>아메리카</b>는 남북 둘 다).</li>
+      <li>옛 이름으로도 찾을 수 있습니다 — 터키, 스와질란드, 버마. 옛 한자 이름도 됩니다 — <b>불란서</b>, <b>화란</b>, <b>이태리</b>, <b>월남</b>. 초성도 됩니다 — <b>ㅂㄹㅈ</b> → 브라질.</li>
+      <li>지역 이름을 치면 그 지역 나라가 모두 나옵니다 — 대륙(<b>유럽</b>, <b>아시아</b> …)과 <b>북미</b>·<b>중미</b>·<b>남미</b>·<b>카리브</b>, <b>동아시아</b>·<b>동남아</b>·<b>중동</b>·<b>중앙아시아</b>, <b>북유럽</b>·<b>서유럽</b>·<b>동유럽</b>·<b>발칸</b>, <b>북아프리카</b>·<b>서아프리카</b> 같은 말.</li>
       <li>지도는 휠이나 두 손가락으로 확대하고, 끌어서 옮깁니다.</li>
     </ul>
   </div>
@@ -783,19 +783,51 @@ function cho(s){
   }).join('');
 }
 function norm(s){ return String(s).replace(/\s+/g, '').toLowerCase(); }
-/* 대륙 이름을 끝까지 치면 그 대륙 나라를 전부 가나다순으로 보여 준다 — 유럽 → 47곳.
-   중간까지만 친 "아프" 는 나라 이름(아프가니스탄)으로 찾는다 */
-var REGIONS = ['아시아', '유럽', '아프리카', '북아메리카', '남아메리카', '오세아니아'];
+/* 지역 이름을 끝까지 치면 그 지역 나라를 전부 가나다순으로 보여 준다 — 유럽 → 46곳, 동남아 → 11곳.
+   대륙(reg)과 mledoze 소지역(sr)으로 묶되, 한국에서 흔히 쓰는 뜻에 맞춰 더하고 뺐다.
+   중간까지만 친 "아프" 나, 나라 이름과 똑같은 말(미크로네시아, 중앙아프리카)은 나라로 찾는다 */
+var GROUPS = (function(){
+  var g = {
+    '아시아':{ reg:['아시아'] }, '유럽':{ reg:['유럽'] }, '아프리카':{ reg:['아프리카'] },
+    '북아메리카':{ reg:['북아메리카'] }, '남아메리카':{ reg:['남아메리카'] }, '오세아니아':{ reg:['오세아니아'] },
+    '아메리카':{ reg:['북아메리카', '남아메리카'] },
+    '북미':{ sr:['North America'] },                                   // 미국·캐나다·멕시코
+    '중미':{ sr:['Central America'] }, '카리브':{ sr:['Caribbean'] },
+    '남미':{ reg:['남아메리카'] },
+    '중남미':{ sr:['Central America', 'Caribbean', 'South America'] },
+    '동아시아':{ sr:['Eastern Asia'] }, '동남아시아':{ sr:['South-Eastern Asia'] }, '남아시아':{ sr:['Southern Asia'] },
+    '중앙아시아':{ sr:['Central Asia'] }, '서아시아':{ sr:['Western Asia'] },
+    '중동':{ sr:['Western Asia'], add:['EGY', 'IRN'], drop:['GEO', 'ARM', 'AZE'] },   // 코카서스는 빼고 이집트·이란은 넣는다
+    '북유럽':{ ids:['DNK', 'NOR', 'SWE', 'FIN', 'ISL', 'EST', 'LVA', 'LTU'] },       // 북유럽 5국 + 발트 3국
+    '서유럽':{ sr:['Western Europe'], add:['GBR', 'IRL'] },
+    '남유럽':{ sr:['Southern Europe'] },
+    '동유럽':{ sr:['Eastern Europe', 'Central Europe', 'Southeast Europe'] },       // 폴란드·체코·발칸까지
+    '중부유럽':{ sr:['Central Europe'] }, '발칸':{ sr:['Southeast Europe'] },
+    '북아프리카':{ sr:['Northern Africa'] }, '서아프리카':{ sr:['Western Africa'] }, '동아프리카':{ sr:['Eastern Africa'] },
+    '중부아프리카':{ sr:['Middle Africa'] }, '남부아프리카':{ sr:['Southern Africa'] },
+    '멜라네시아':{ sr:['Melanesia'] }, '폴리네시아':{ sr:['Polynesia'] }
+  };
+  g['미주'] = g['아메리카']; g['카리브해'] = g['카리브']; g['중앙아메리카'] = g['중미'];
+  g['라틴아메리카'] = g['중남미']; g['동남아'] = g['동남아시아']; g['중유럽'] = g['중부유럽']; g['발칸반도'] = g['발칸'];
+  return g;
+})();
 function regionQuery(q){
   q = norm(q);
-  if (q === '아메리카' || q === '미주') return ['북아메리카', '남아메리카'];
-  return REGIONS.indexOf(q) >= 0 ? [q] : null;
+  var grp = GROUPS[q];
+  if (!grp) return null;
+  /* 나라 이름·옛 이름과 똑같으면 나라가 먼저다 */
+  if (U.some(function(u){ return u.keys.some(function(k){ return k.s === q; }); })) return null;
+  return U.map(function(u, i){ return i; }).filter(function(i){
+    var u = U[i];
+    if (grp.drop && grp.drop.indexOf(u.id) >= 0) return false;
+    if (grp.add && grp.add.indexOf(u.id) >= 0) return true;
+    if (grp.ids) return grp.ids.indexOf(u.id) >= 0;
+    return (grp.reg && grp.reg.indexOf(u.reg) >= 0) || (grp.sr && grp.sr.indexOf(u.sr) >= 0);
+  }).sort(function(a, b){ return U[a].name < U[b].name ? -1 : 1; });
 }
 function search(q){
   var rg = regionQuery(q);
-  if (rg) return U.map(function(u, i){ return i; })
-    .filter(function(i){ return rg.indexOf(U[i].reg) >= 0; })
-    .sort(function(a, b){ return U[a].name < U[b].name ? -1 : 1; });
+  if (rg) return rg;
   q = norm(q);
   if (!q) return [];
   var onlyCho = /^[ㄱ-ㅎ]+$/.test(q), out = [];
@@ -819,14 +851,10 @@ function renderSug(){
   var q = $('#q').value, box = $('#sug');
   sugIdx = search(q); sugSel = 0; sugMoved = false;
   if (!sugIdx.length || S.solved || S.gaveup) { box.hidden = true; return; }
-  var nq = norm(q);
   box.innerHTML = sugIdx.map(function(i, k){
     var u = U[i], was = guessOf(u.id);
-    /* 옛 이름으로 찾았으면 무엇으로 찾았는지 보여 준다 — 터키 → 튀르키예 */
-    var alias = u.al.filter(function(a){ return norm(a).indexOf(nq) >= 0; })[0];
-    if (norm(u.name).indexOf(nq) >= 0 || cho(norm(u.name)).indexOf(nq) >= 0) alias = null;
     return '<li role="option" data-i="' + i + '" aria-selected="' + (k === sugSel) + '">' +
-      '<span>' + esc(u.name) + '</span><span class="s">' + esc(alias ? '← ' + alias : u.sub) + '</span>' +
+      '<span>' + esc(u.name) + '</span><span class="s">' + esc(u.sub) + '</span>' +
       (was ? '<span class="was">' + pts(was.score) + '</span>' : '') + '</li>';
   }).join('');
   box.hidden = false;

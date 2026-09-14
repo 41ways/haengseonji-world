@@ -24,7 +24,7 @@ def enc(g):
 
 mp = []
 for u in units:
-    mp.append({'id': u['id'], 'name': u['name'], 'cap': u['cap'], 'al': u['al'], 'reg': u['reg'], 'of': u['of'],
+    mp.append({'id': u['id'], 'name': u['name'], 'cap': u['cap'], 'al': u['al'], 'reg': u['reg'], 'sr': u['sr'], 'of': u['of'],
                'lat': u['lat'], 'lng': u['lng'], 'p': enc(geo[u['id']])})
 json.dump({'q': 100, 'land': enc(geo['']), 'units': mp}, open('../map.json', 'w'), ensure_ascii=False, separators=(',', ':'))
 data = [{k: u[k] for k in ('id', 'name', 'cap', 'reg', 'lat', 'lng')} for u in units]

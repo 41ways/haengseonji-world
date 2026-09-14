@@ -108,17 +108,7 @@ rep("  if (rank <= 70) return '그럭저럭';\n  if (rank <= 120) return '멂';\
 block('// ══════════════════════════════ 지도\n', '// ══════════════════════════════ 찾기 (이름·초성)', open(sys.argv[3], encoding='utf-8').read())
 # ── 찾기 (별칭 포함)
 block('// ══════════════════════════════ 찾기 (이름·초성)', 'var sugIdx = [], sugSel = 0;', open(sys.argv[4], encoding='utf-8').read())
-rep('''  box.innerHTML = sugIdx.map(function(i, k){
-    var u = U[i], was = guessOf(u.id);
-    return '<li role="option" data-i="' + i + '" aria-selected="' + (k === sugSel) + '">' +
-      '<span>' + esc(u.name) + '</span><span class="s">' + esc(u.sub) + '</span>' +''', '''  var nq = norm(q);
-  box.innerHTML = sugIdx.map(function(i, k){
-    var u = U[i], was = guessOf(u.id);
-    /* 옛 이름으로 찾았으면 무엇으로 찾았는지 보여 준다 — 터키 → 튀르키예 */
-    var alias = u.al.filter(function(a){ return norm(a).indexOf(nq) >= 0; })[0];
-    if (norm(u.name).indexOf(nq) >= 0 || cho(norm(u.name)).indexOf(nq) >= 0) alias = null;
-    return '<li role="option" data-i="' + i + '" aria-selected="' + (k === sugSel) + '">' +
-      '<span>' + esc(u.name) + '</span><span class="s">' + esc(alias ? '← ' + alias : u.sub) + '</span>' +''')
+# 옛 이름(불란서)으로 찾아도 목록에는 본이름과 지역만 — 프랑스 · 유럽
 rep("msg('\"' + q + '\" — 그런 시·군은 없습니다', true);", "msg('\"' + q + '\" — 그런 나라는 목록에 없습니다', true);")
 rep("msg(easy ? easyHint() : '어디든 하나 불러서 시작하세요.');", "msg(easy ? easyHint() : '아무 나라나 불러서 출발하세요.');")
 rep("'지도에 마우스를 올려 보고, 눌러서 부르세요. 이름을 적어도 됩니다.'", "'지구본에 마우스를 올려 보고, 눌러서 부르세요. 끌면 돌아갑니다.'")
@@ -178,6 +168,6 @@ rep("  if (!sugIdx.length) sugIdx = search(q);\n  if (!sugIdx.length) { msg('\"'
     "  if (regionQuery(q) && !sugMoved) { msg(q + ' ' + sugIdx.length + '곳 — 목록에서 골라 누르세요 (방향키로 고르고 Enter)'); renderSug(); return; }\n")
 rep('placeholder="나라 이름 (프랑스, 일본, ㅂㄹㅈ …)"', 'placeholder="나라 이름 (프랑스, 유럽, ㅂㄹㅈ …)"')
 rep("      <li>옛 이름으로도 찾을 수 있습니다 — 터키, 스와질란드, 버마. 초성도 됩니다 — <b>ㅂㄹㅈ</b> → 브라질.</li>",
-    "      <li>옛 이름으로도 찾을 수 있습니다 — 터키, 스와질란드, 버마. 초성도 됩니다 — <b>ㅂㄹㅈ</b> → 브라질.</li>\n      <li>대륙 이름을 치면 그 대륙 나라가 모두 나옵니다 — <b>유럽</b>, <b>아시아</b>, <b>아프리카</b>, <b>북아메리카</b>, <b>남아메리카</b>, <b>오세아니아</b> (<b>아메리카</b>는 남북 둘 다).</li>")
+    "      <li>옛 이름으로도 찾을 수 있습니다 — 터키, 스와질란드, 버마. 옛 한자 이름도 됩니다 — <b>불란서</b>, <b>화란</b>, <b>이태리</b>, <b>월남</b>. 초성도 됩니다 — <b>ㅂㄹㅈ</b> → 브라질.</li>\n      <li>지역 이름을 치면 그 지역 나라가 모두 나옵니다 — 대륙(<b>유럽</b>, <b>아시아</b> …)과 <b>북미</b>·<b>중미</b>·<b>남미</b>·<b>카리브</b>, <b>동아시아</b>·<b>동남아</b>·<b>중동</b>·<b>중앙아시아</b>, <b>북유럽</b>·<b>서유럽</b>·<b>동유럽</b>·<b>발칸</b>, <b>북아프리카</b>·<b>서아프리카</b> 같은 말.</li>")
 open(DST, 'w', encoding='utf-8').write(s)
 print('ok', len(s))
