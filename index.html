@@ -147,11 +147,6 @@ h1 .no{font-family:var(--mono);font-size:.4em;font-weight:400;color:var(--faint)
 .map path.hit{stroke:rgba(60,40,20,.55);cursor:pointer}
 .map path.now{stroke:var(--ink);stroke-width:2px}
 .map path.ans{fill:var(--ink);stroke:var(--ink)}
-/* 지도 도움 — 마우스가 올라간 칸이 살짝 커지며 칠해진다 */
-.map.easy svg{cursor:pointer}
-.map path.hov{pointer-events:none;fill:var(--accent);fill-opacity:.82;stroke:var(--ink);stroke-width:1.6px;
-  transform-box:fill-box;transform-origin:center;transform:scale(1.14);
-  filter:drop-shadow(0 2px 3px rgba(0,0,0,.28));transition:transform .12s ease-out}
 #marks{position:absolute;inset:0;pointer-events:none}
 .dot{position:absolute;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:var(--ink);border:1.5px solid var(--ink);pointer-events:none}
 .pin{position:absolute;pointer-events:none;transform:translate(-50%,-100%);font-size:22px;line-height:1;filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))}
@@ -381,9 +376,9 @@ dialog::backdrop{background:rgba(17,17,17,.38)}
       <li>한 곳을 부르면 그 나라 수도가 <b>정답 수도에서 몇 번째로 가까운지</b>와, 그 순서로 매긴 <b>100점 만점 점수</b>를 알려 줍니다.</li>
       <li>점수는 정답이 <b>100.00점</b>, 그 밖은 <b>한 계단마다 0.50점</b>씩 낮아집니다 — 2번째로 가까우면 99.00점, 10번째면 95.00점.</li>
       <li>거리(km)는 알려 주지 않습니다. 거리를 알면 원 세 개를 그려 교차점으로 정답을 특정할 수 있어서, <b>순서만</b> 알려 줍니다.</li>
-      <li>지구본에 마우스를 올리면 그곳이 커지며 이름이 보이고, <b>눌러서 바로 부를 수</b> 있습니다 (손가락은 한 번 눌러 이름을 보고, 한 번 더 눌러 부릅니다). 이름을 적어서 불러도 됩니다.</li>
+      <li>지구본에 마우스를 올리면 그 나라가 칠해지며 이름이 보이고, <b>눌러서 바로 부를 수</b> 있습니다 (손가락은 한 번 눌러 이름을 보고, 한 번 더 눌러 부릅니다). 이름을 적어서 불러도 됩니다.</li>
       <li><b>하루 한 판</b>입니다. 맞히거나 포기하면 그날은 끝이고, <b>무한 모드</b>는 오늘 문제와 따로 정답을 뽑아 언제든 몇 판이든 할 수 있습니다 (순위에 오르지 않습니다).</li>
-      <li><b>하드 모드</b>는 무한 모드에서 지구본 도움을 끈 판입니다. 눌러서 부를 수 없고 나라 이름도 보이지 않아, <b>이름을 적어서만</b> 부릅니다. 기록은 남지 않습니다.</li>
+      <li><b>하드 모드</b>는 무한 모드에서 지구본 도움을 끈 판입니다. 눌러서 부를 수 없고 아직 안 부른 나라는 이름도 보이지 않아, <b>이름을 적어서만</b> 부릅니다. 기록은 남지 않습니다.</li>
       <li>시계는 <b>첫 추측부터</b> 정답까지 서버가 잽니다. 순위는 <b>적게 부른 순</b>, 횟수가 같으면 빠른 순입니다. 포기하면 순위에 오르지 않습니다.</li>
       <li>199곳 = 유엔 회원국 193 + 바티칸·팔레스타인·대만·코소보 + <b>홍콩·마카오</b>. 괌·그린란드 같은 속령은 따로 치지 않습니다.</li>
       <li>수도가 여럿이면 공식 수도로 잽니다 — 볼리비아 <b>수크레</b>, 네덜란드 <b>암스테르담</b>, 남아공 <b>프리토리아</b>, 스리랑카 <b>스리자야와르데네푸라코테</b>.</li>
@@ -622,6 +617,20 @@ function featureAt(xy){
   }
   return null;
 }
+/* 누를 나라 고르기 — 바티칸·모나코·투발루처럼 몇 km 짜리 나라는 모양으로는 못 누르므로,
+   화면에서 아주 작게 보이는 나라는 수도 점 가까이(9px)만 와도 잡는다. 이탈리아 안의 바티칸도 이렇게 먼저 잡힌다 */
+function pickAt(xy){
+  var best = null, bd = 9 * 9, k = proj.scale() * Math.PI / 180;   // 1° 가 몇 px 인지
+  for (var i = 0; i < U.length; i++) {
+    var b = BOUNDS[i], span = Math.max(b[1][1] - b[0][1], Math.abs(b[1][0] - b[0][0]));
+    if (span * k > 12) continue;
+    var u = U[i];
+    if (!facing(u.lng, u.lat)) continue;
+    var p = proj([u.lng, u.lat]), d = (p[0] - xy[0]) * (p[0] - xy[0]) + (p[1] - xy[1]) * (p[1] - xy[1]);
+    if (d < bd) { bd = d; best = i; }
+  }
+  return best != null ? best : featureAt(xy);
+}
 function setHov(i, xy){
   if (HOVI === i) return;                       // 같은 나라 안에서 움직이면 다시 그리지 않는다
   HOVI = i; HOVXY = i == null ? null : xy;
@@ -657,13 +666,14 @@ function buildMap(){
   if (window.ResizeObserver) new ResizeObserver(sizeGlobe).observe(cv);
 
   var wrap = $('#mapwrap'), tip = $('#tip'), ptr = {}, dragged = false, touch = false, armed = null;   // ptr: 누르고 있는 손가락·마우스
+  disarm = function(){ armed = null; tip.hidden = true; setHov(null); };
   function local(e){ var r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
   function show(e){
     if (dragged) { tip.hidden = true; setHov(null); return; }
     var xy = local(e), hit = null, best = 12 * 12;
     if (easyOn()) {
-      /* 지도 도움 — 어느 나라든 올리면 커지며 이름이 나온다 */
-      var hi = featureAt(xy);
+      /* 지도 도움 — 어느 나라든 올리면 칠해지며 이름이 나온다 */
+      var hi = pickAt(xy);
       setHov(hi, xy);
       if (hi == null) { tip.hidden = true; return; }
       var hu = U[hi], hg = guessOf(hu.id);
@@ -706,7 +716,7 @@ function buildMap(){
     if (ids.length === 1) {
       var dx = e.clientX - p.x, dy = e.clientY - p.y;
       if (!dragged && Math.abs(dx) + Math.abs(dy) < 3) return;
-      dragged = true; tip.hidden = true; wrap.classList.add('drag');
+      dragged = true; armed = null; tip.hidden = true; wrap.classList.add('drag');
       var k = 180 / Math.PI / proj.scale();                // 화면 1px 이 몇 도인지
       ROT = [ROT[0] + dx * k, Math.max(-85, Math.min(85, ROT[1] - dy * k)), 0];
       p.x = e.clientX; p.y = e.clientY;
@@ -726,14 +736,14 @@ function buildMap(){
   wrap.addEventListener('pointerleave', function(e){ if (!ptr[e.pointerId]) { tip.hidden = true; setHov(null); } });
   cv.addEventListener('click', function(e){
     if (dragged || !easyOn()) return;
-    var i = featureAt(local(e));
-    if (i == null) return;
+    var i = pickAt(local(e));
+    if (i == null) { armed = null; tip.hidden = true; setHov(null); return; }
     /* 손가락은 처음 누르면 이름만 — 같은 나라를 한 번 더 눌러야 부른다. 돌리려다 잘못 부르는 일이 없게 */
     if (touch && armed !== i) { armed = i; show(e); return; }
     armed = null; tip.hidden = true; setHov(null);
     guess(i);
   });
-  wrap.addEventListener('wheel', function(e){ e.preventDefault(); setZoom(ZOOM * Math.pow(1.0018, -e.deltaY)); }, { passive:false });
+  wrap.addEventListener('wheel', function(e){ e.preventDefault(); tip.hidden = true; setHov(null); setZoom(ZOOM * Math.pow(1.0018, -e.deltaY)); }, { passive:false });
   $('#zin').onclick = function(){ setZoom(ZOOM * 1.8); };
   $('#zout').onclick = function(){ setZoom(ZOOM / 1.8); };
   $('#zall').onclick = function(){ setZoom(1); };
@@ -898,7 +908,7 @@ function guess(i){
                     : api('/api/guess', { day:S.day, pid:PID, id:u.id, name:lsGet('hsj2-name') || '' });
   call.then(function(r){
     S.busy = false;
-    if (r.closed) { return load(); }
+    if (r.closed) { return load().then(function(){ if ((S.solved || S.gaveup) && $('#title').hidden) backToTitle(); }); }
     if (!S.started) S.started = now();
     S.list.push({ id:r.id, score:r.score, rank:r.rank, correct:r.correct, no:S.list.length + 1 });
     S.lastId = r.id;
@@ -909,8 +919,8 @@ function guess(i){
     }
     msg('');
     render();
-    if (S.solved) { celebrate(); setTimeout(openDone, 520); }
-    else $('#q').focus();
+    if (S.solved) { var round = S.free; celebrate(); setTimeout(function(){ if (S.free === round && S.solved && !$('#game').hidden) openDone(); }, 520); }
+    else if (matchMedia('(hover:hover)').matches) $('#q').focus();   // 손가락으로 누른 뒤 자판이 올라와 화면이 밀리지 않게
   }).catch(function(e){
     S.busy = false;
     msg(e.status === 409 ? '날짜가 바뀌었습니다 — 새로고침해 주세요' : '못 보냈습니다: ' + e.message, true);
@@ -926,7 +936,9 @@ function giveup(){
 }
 
 // ══════════════════════════════ 그리기
+var disarm = function(){};   // 손가락으로 한 번 눌러 둔 나라·강조·말풍선 — 판이 바뀌거나 무엇이든 부르면 푼다
 function render(){
+  disarm();
   $('#no').textContent = S.free ? (S.hard ? '하드 모드' : '무한 모드') : (S.no ? '제' + S.no + '호' : '');
   var done = S.solved || S.gaveup;
   $('#askform').hidden = done;
@@ -1052,7 +1064,7 @@ function saveName(){
     S.board = b;
     if (b.tag) lsSet('hsj2-tag', b.tag);
     var ns = $('#nameSave'); if (ns) ns.textContent = b.tag ? b.tag + ' ✓' : '저장됨 ✓';
-    setTimeout(backToTitle, b.tag ? 900 : 600);
+    setTimeout(function(){ if (!S.free && (S.solved || S.gaveup)) backToTitle(); }, b.tag ? 900 : 600);
   }).catch(function(e){ alert('이름을 못 올렸습니다: ' + e.message); });
 }
 
@@ -1225,9 +1237,11 @@ function titleFinished(){
 /* 무한 모드·하드 모드 — 오늘 판은 잠시 치워 두고 새 판을 연다. 기록은 서버에 남지 않는다.
    하드 모드는 같은 연습 판에서 지도 도움만 끈 것이다 — 이름을 적어서만 부른다 */
 function startFree(hard){
-  var b = $(hard ? '#btnHard' : '#btnFree'), label = b.textContent;
+  var b = $(hard ? '#btnHard' : '#btnFree'), label = b.textContent, fromTitle = !$('#title').hidden;
   b.disabled = true; b.textContent = '여는 중…';
   api('/api/free').then(function(r){
+    /* 기다리는 사이 타이틀을 떠났으면(시작을 눌러 오늘 판으로) 이 판은 버린다 — 오늘 판 기록이 연습 판에 섞이지 않게 */
+    if (fromTitle && $('#title').hidden) { b.disabled = false; b.textContent = label; return; }
     if (!S.free) S.daily = { list:S.list, solved:S.solved, gaveup:S.gaveup, started:S.started, elapsed:S.elapsed,
                              answer:S.answer, order:S.order, board:S.board, lastId:S.lastId };
     S.free = r.rid; S.hard = !!hard; S.list = []; S.solved = false; S.gaveup = false;
@@ -1237,7 +1251,8 @@ function startFree(hard){
     startGame();
   }).catch(function(e){
     b.disabled = false; b.textContent = label;
-    msg('연습 판을 못 열었습니다: ' + e.message, true);
+    var t = '연습 판을 못 열었습니다: ' + e.message;
+    if (fromTitle) { $('#terr').hidden = false; $('#terr').textContent = t; } else msg(t, true);
   });
 }
 function endFree(){
